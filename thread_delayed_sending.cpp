@@ -1,8 +1,10 @@
-#include "thread_delayed_sending.h"
+﻿#include "thread_delayed_sending.h"
 #include <QDebug>
+#include <QMessageBox>
 #pragma execution_character_set("utf-8")
 thread_delayed_sending::thread_delayed_sending(QObject *parent) : QObject(parent)
 {
+//     connect(&serial,&QSerialPort::readyRead,this,&MainWindow::serialPort_readyRead);//读取串口消息的信号与槽
 
 
 }
@@ -11,10 +13,11 @@ void thread_delayed_sending::init()
 {
     qDebug()<<"子线程:"<<"初始化";
     serial = new QSerialPort;
-
+    connect(serial,&QSerialPort::readyRead,this,&thread_delayed_sending::serialPort_readyRead);//读取串口消息的信号与槽
 //    serial->setPortName("COM1");
 //    qDebug()<<serial->open(QIODevice::ReadWrite);
     qDebug()<<"子线程号:"<<QThread::currentThread();
+    emit init_finish();
 }
 
 
@@ -37,6 +40,7 @@ void thread_delayed_sending::close_urt()
 void thread_delayed_sending::config_mar(QString com, int band, int data, int check, int stop)
 {
     qDebug()<<"接收成功";
+    serial->close();
     serial->setPortName(com);
     serial->setBaudRate(band);
     //数据位
@@ -66,14 +70,14 @@ void thread_delayed_sending::config_mar(QString com, int band, int data, int che
     }
     //设置流控制
     serial->setFlowControl(QSerialPort::NoFlowControl);
-    serial->open(QIODevice::ReadWrite);
+    bool ok = serial->open(QIODevice::ReadWrite);
+    emit  is_ok(ok);
 
 }
 
-void thread_delayed_sending::com_config(QString com)
-{
-    serial->close();
-    serial->setPortName(com);
-    serial->open(QIODevice::ReadWrite);
 
+void thread_delayed_sending::serialPort_readyRead()
+{
+   QByteArray buffer = serial->readAll();
+   emit  recieve_data(buffer);
 }

@@ -39,7 +39,7 @@ private slots:
 
     void on_send_data_clicked();
 
-    void serialPort_readyRead();
+    void serialPort_readyRead(QByteArray data);
 
     void on_comboBox_com_activated(const QString &arg1);
 
@@ -59,12 +59,9 @@ private slots:
 
     void send_signal_slots();
 
-    void init(bool status);
-
-    void re_open();
-
-
     void on_draw_pic_clicked();
+
+    void message_box_ok(bool ok);
 
 private:
     Ui::MainWindow *ui;
@@ -78,6 +75,7 @@ private:
     QTimer *time_up;
     bool is_run_thread;
     drawing *dr;
+    QTimer *start_thread;
 protected:
 
           void timerEvent(QTimerEvent *event);
